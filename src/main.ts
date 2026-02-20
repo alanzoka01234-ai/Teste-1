@@ -1,26 +1,40 @@
-import Phaser from 'phaser';
 import './style.css';
-import { MenuScene } from './scenes/MenuScene';
-import { GameScene } from './scenes/GameScene';
+import { Application } from 'pixi.js';
+import { MenuView } from './views/MenuView';
+import { GameView } from './views/GameView';
 
-const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  parent: 'app',
-  backgroundColor: '#070a10',
-  physics: {
-    default: 'arcade',
-    arcade: {
-      debug: false,
-      gravity: { x: 0, y: 0 },
-    },
-  },
-  scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: window.innerWidth,
-    height: window.innerHeight,
-  },
-  scene: [MenuScene, GameScene],
-};
+const root = document.getElementById('app')!;
+const app = new Application();
 
-new Phaser.Game(config);
+(async () => {
+  await app.init({
+    resizeTo: window,
+    antialias: true,
+    background: '#070a10',
+    resolution: Math.min(window.devicePixelRatio || 1, 1.5),
+    autoDensity: true,
+    powerPreference: 'high-performance',
+  });
+
+  root.appendChild(app.canvas);
+
+  let current: MenuView | GameView;
+
+  const goMenu = () => {
+    if (current) current.destroy();
+    current = new MenuView(app, { onPlay: goGame });
+    app.stage.addChild(current.container);
+  };
+
+  const goGame = () => {
+    if (current) current.destroy();
+    current = new GameView(app, { onExit: goMenu });
+    app.stage.addChild(current.container);
+  };
+
+  goMenu();
+
+  window.addEventListener('resize', () => {
+    if (current) current.onResize();
+  });
+})();

@@ -5,13 +5,16 @@ html, body {
   height: 100%;
   background: #070a10;
   overflow: hidden;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
 
-#app {
+#app { width: 100%; height: 100%; }
+
+canvas {
+  display: block;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }
 
-canvas { touch-action: none; }
 * { -webkit-tap-highlight-color: transparent; }
