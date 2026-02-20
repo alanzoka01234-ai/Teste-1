@@ -1,34 +1,28 @@
-# Neon Survivor (Phaser Port) — Etapa 1
+# Neon Survivor — PixiJS Port (v2.0.0)
 
-Este projeto é a **Etapa 1** do port do seu jogo para **Phaser 3 (2D)** usando **Arcade Physics** e **mundo fixo 8000×8000**.
+Port do seu jogo (base v1.7.1) para **PixiJS** com **Vite + TypeScript**.
 
-## O que já tem nesta etapa
-- Vite + TypeScript + Phaser
-- `MenuScene` com botão **Jogar**
-- `GameScene` com:
-  - mundo fixo **8000×8000**
-  - Arcade Physics habilitado
-  - jogador com movimento (WASD / setas)
-  - câmera seguindo o jogador
-  - chão com textura **tile** (gerada em runtime, sem precisar de imagem)
+## Pronto nesta versão
+- Mundo fixo 8000×8000 (world coords)
+- Câmera seguindo o player (somente render por offset)
+- Chão tile (TilingSprite, leve)
+- Player: movimento (WASD/setas) + joystick mobile (touch)
+- Inimigos:
+  - Drone Enxame (kamikaze): spawn + perseguição com “curvinha” + separação leve
+  - Caça Atirador (Burst 3x): mantém distância, telegráfa e atira 3 tiros em cone
+- Arma do player (Canhão Gauss base):
+  - dano 3
+  - 4 tiros/s
+  - projétil rápido
+  - perfuração 0 (no início)
 
-## Rodar local
-1. Instale dependências:
-   ```bash
-   npm install
-   ```
-2. Rode:
-   ```bash
-   npm run dev
-   ```
-
-## Build
+## Rodar
 ```bash
-npm run build
-npm run preview
+npm install
+npm run dev
 ```
 
-## Próximas etapas (resumo)
-- Etapa 2: inimigos + spawn + perseguição
-- Etapa 3: balas + colisão + dano
-- Etapa 4: level up + upgrades (Gauss 1–8)
+## Controles
+- PC: WASD / setas
+- Mobile: toque e arraste no lado esquerdo (joystick)
+- ESC: volta pro menu
