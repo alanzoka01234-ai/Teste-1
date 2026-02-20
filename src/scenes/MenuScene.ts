@@ -27,7 +27,7 @@ export class MenuScene extends Phaser.Scene {
       letterSpacing: '2px',
     }).setOrigin(0.5);
 
-    const sub = this.add.text(width / 2, title.y + 44, 'Port Phaser • Etapa 1', {
+    const sub = this.add.text(width / 2, title.y + 44, 'Port Phaser • Etapa 2', {
       fontSize: '14px',
       color: '#7dd3fc',
       letterSpacing: '1px',

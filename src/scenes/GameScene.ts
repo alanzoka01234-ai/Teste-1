@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { VirtualJoystick } from '../controls/VirtualJoystick';
+import { EnemySystem } from '../systems/EnemySystem';
 
 const WORLD_W = 8000;
 const WORLD_H = 8000;
@@ -11,6 +13,12 @@ export class GameScene extends Phaser.Scene {
   private floor!: Phaser.GameObjects.TileSprite;
 
   private hudText!: Phaser.GameObjects.Text;
+
+  private joystick!: VirtualJoystick;
+
+  private enemies!: EnemySystem;
+
+  private hp = 100;
 
   constructor() {
     super('game');
@@ -73,10 +81,16 @@ export class GameScene extends Phaser.Scene {
     // Camera follow
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
-    // Input
+    // Input (desktop)
     this.cursors = this.input.keyboard!.createCursorKeys();
     const kb = this.input.keyboard!;
     this.keys = { W: kb.addKey('W'), A: kb.addKey('A'), S: kb.addKey('S'), D: kb.addKey('D') };
+
+    // Mobile joystick
+    this.joystick = new VirtualJoystick(this);
+
+    // Enemies system (Drone Enxame)
+    this.enemies = new EnemySystem(this, this.player);
 
     // HUD (fixed to camera)
     this.hudText = this.add.text(12, 10, '', {
@@ -87,17 +101,15 @@ export class GameScene extends Phaser.Scene {
 
     // Back to menu (ESC)
     kb.on('keydown-ESC', () => this.scene.start('menu'));
-
-    // Resize handler (keeps HUD nice)
-    this.scale.on('resize', () => {
-      // nothing required; RESIZE mode handles it
-    });
   }
 
-  update(_time: number, delta: number) {
+  update(time: number, delta: number) {
+    const dt = delta / 1000;
+
     // Movement (Arcade physics velocity)
     const speed = 320;
 
+    // Keyboard vector
     let vx = 0;
     let vy = 0;
 
@@ -111,7 +123,15 @@ export class GameScene extends Phaser.Scene {
     if (up) vy -= 1;
     if (down) vy += 1;
 
-    // normalize diagonal
+    // Joystick vector (mobile)
+    const j = this.joystick.getVector();
+    const useJoy = (j.x !== 0 || j.y !== 0) && !(vx !== 0 || vy !== 0);
+    if (useJoy) {
+      vx = j.x;
+      vy = j.y;
+    }
+
+    // normalize diagonal (keyboard)
     if (vx !== 0 && vy !== 0) {
       const inv = 1 / Math.sqrt(2);
       vx *= inv;
@@ -120,20 +140,31 @@ export class GameScene extends Phaser.Scene {
 
     this.player.setVelocity(vx * speed, vy * speed);
 
-    // Visual rotation toward movement direction (optional)
+    // Visual rotation toward movement direction
     if (vx !== 0 || vy !== 0) {
       this.player.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
     }
 
-    // Floor tile scroll matches camera for better feeling (optional)
+    // Enemies: spawn + AI pursuit
+    this.enemies.update(time);
+
+    // Contact damage (Drone Enxame): 6 por segundo por inimigo encostando
+    this.physics.overlap(this.player, this.enemies.group, () => {
+      this.hp = Math.max(0, this.hp - 6 * dt);
+    });
+
+    // Floor tile scroll matches camera (optional feel)
     const cam = this.cameras.main;
     this.floor.tilePositionX = cam.scrollX;
     this.floor.tilePositionY = cam.scrollY;
 
     // HUD
     const fps = Math.round(this.game.loop.actualFps);
+    const enemiesAlive = this.enemies.group.countActive(true);
     this.hudText.setText([
+      `HP: ${this.hp.toFixed(0)}`,
       `POS: ${this.player.x.toFixed(0)}, ${this.player.y.toFixed(0)}`,
+      `ENEMIES: ${enemiesAlive}`,
       `FPS: ${fps}`,
       `ESC: Menu`,
     ]);
